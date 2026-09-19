@@ -20,6 +20,11 @@ describe("roundMoney", () => {
     expect(roundMoney(1.005)).toBe(1.01)
     expect(roundMoney(8.675)).toBe(8.68)
   })
+
+  it("stays finite for values that stringify in exponent notation", () => {
+    expect(roundMoney(1e21) / 1e21).toBeCloseTo(1, 10)
+    expect(roundMoney(1e-7)).toBe(0)
+  })
 })
 
 describe("grossFromNet / netFromGross", () => {

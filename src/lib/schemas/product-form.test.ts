@@ -75,6 +75,13 @@ describe("pricingSchema", () => {
     })
   })
 
+  it("stores typed amounts rounded to two decimals", () => {
+    expect(pricingSchema.parse({ ...validValues, priceNet: "10.005", priceGross: "12,3" })).toMatchObject({
+      priceNet: 10.01,
+      priceGross: 12.3,
+    })
+  })
+
   it("reports empty and malformed amounts on the right field", () => {
     expect(
       issuesOf(pricingSchema.safeParse({ ...validValues, priceNet: "", priceGross: "12,x" }))

@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import { parseAmount } from "@/lib/price"
+import { parseAmount, roundMoney } from "@/lib/price"
 import {
   CATEGORIES,
   CURRENCIES,
@@ -74,7 +74,7 @@ const amountField = (requiredMessage: string) =>
       })
       return z.NEVER
     }
-    return amount
+    return roundMoney(amount)
   })
 
 const integerField = (requiredMessage: string) =>

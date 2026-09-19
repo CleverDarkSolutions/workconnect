@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { formatProductCount } from "@/lib/format"
 import { MOCK_PRODUCTS } from "@/lib/products/mock-products"
 import { clampPage, getPageCount, getPageItems } from "@/lib/products/pagination"
-import { PRODUCTS_PER_PAGE, type Product } from "@/lib/products/product"
+import { createProductId, PRODUCTS_PER_PAGE, type Product } from "@/lib/products/product"
 import type { ProductInput } from "@/lib/schemas/product-form"
 
 export function ProductsPage() {
@@ -26,7 +26,7 @@ export function ProductsPage() {
   const visibleProducts = getPageItems(products, page, PRODUCTS_PER_PAGE)
 
   function addProduct(input: ProductInput) {
-    setProducts((current) => [...current, { ...input, id: crypto.randomUUID() }])
+    setProducts((current) => [...current, { ...input, id: createProductId() }])
     toast.success("Produkt został dodany")
   }
 

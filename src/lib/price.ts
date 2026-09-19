@@ -11,8 +11,8 @@ const AMOUNT_PATTERN = /^\d+(?:[.,]\d+)?$/
 /** Rounds half away from zero to 2 decimals without binary float artifacts (1.005 → 1.01). */
 export function roundMoney(value: number): number {
   const [mantissa, exponent = "0"] = value.toString().split("e")
-  const shifted = Math.round(Number(`${mantissa}e${Number(exponent) + 2}`))
-  return Number(`${shifted}e-2`)
+  const cents = Math.round(Number(`${mantissa}e${Number(exponent) + 2}`))
+  return cents / 100
 }
 
 export function grossFromNet(net: number, vatRatePercent: number): number {

@@ -22,8 +22,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { productSchema, type ProductInput } from "@/lib/schemas/product-form"
+import {
+  productSchema,
+  type ProductFormValues,
+  type ProductInput,
+} from "@/lib/schemas/product-form"
 import { cn } from "@/lib/utils"
+
+type FieldName = keyof ProductFormValues
 
 type ProductFormDialogProps = {
   /** The "Dodaj produkt" button; wired as the dialog trigger so focus returns to it on close. */
@@ -45,24 +51,28 @@ export function ProductFormDialog({ trigger, onSubmit }: ProductFormDialogProps)
         return
       }
       onSubmit(productSchema.parse(value))
-      handleOpenChange(false)
+      setOpen(false)
+    },
+    // A blocked "Dalej" reveals the errors of every field on the step, the
+    // way leaving each field would; fields are otherwise quiet while typing.
+    onSubmitInvalid: ({ formApi }) => {
+      for (const name of Object.keys(formApi.state.fieldMeta) as FieldName[]) {
+        formApi.setFieldMeta(name, (meta) => ({ ...meta, isBlurred: true }))
+      }
     },
   })
 
   const step = useStore(form.store, (state) => state.values.step)
 
-  function handleOpenChange(nextOpen: boolean) {
-    setOpen(nextOpen)
-    // Closing (X, Escape, overlay click or a successful save) always starts
-    // the next session from a blank step 1.
-    if (!nextOpen) form.reset()
-  }
-
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent
         showCloseButton={false}
+        // Closing (X, Escape, overlay click or a successful save) always starts
+        // the next session from a blank step 1. This fires once the closing
+        // animation has finished, so the form does not snap to step 1 mid-fade.
+        onCloseAutoFocus={() => form.reset()}
         className="top-0 left-0 flex h-dvh w-full max-w-none translate-x-0 translate-y-0 flex-col gap-0 rounded-none p-0 sm:top-1/2 sm:left-1/2 sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:max-w-[720px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl"
       >
         <DialogHeader className="flex h-16 shrink-0 flex-row items-center justify-between gap-0 border-b px-4">

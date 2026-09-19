@@ -63,16 +63,22 @@ export function ProductFormDialog({ trigger, onSubmit }: ProductFormDialogProps)
   })
 
   const step = useStore(form.store, (state) => state.values.step)
+  const isSubmitting = useStore(form.store, (state) => state.isSubmitting)
+
+  function handleOpenChange(nextOpen: boolean) {
+    // Every session starts from a blank step 1, however the previous one
+    // ended (X, Escape, overlay click or a successful save). Resetting on
+    // open rather than on close keeps the closing animation from snapping to
+    // step 1 and cannot be skipped by reopening mid-animation.
+    if (nextOpen) form.reset()
+    setOpen(nextOpen)
+  }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent
         showCloseButton={false}
-        // Closing (X, Escape, overlay click or a successful save) always starts
-        // the next session from a blank step 1. This fires once the closing
-        // animation has finished, so the form does not snap to step 1 mid-fade.
-        onCloseAutoFocus={() => form.reset()}
         className="top-0 left-0 flex h-dvh w-full max-w-none translate-x-0 translate-y-0 flex-col gap-0 rounded-none p-0 sm:top-1/2 sm:left-1/2 sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:max-w-[720px] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl"
       >
         <DialogHeader className="flex h-16 shrink-0 flex-row items-center justify-between gap-0 border-b px-4">
@@ -120,7 +126,7 @@ export function ProductFormDialog({ trigger, onSubmit }: ProductFormDialogProps)
                 Wstecz
               </Button>
             )}
-            <Button type="submit">
+            <Button type="submit" disabled={isSubmitting}>
               {step === LAST_STEP ? (
                 "Zapisz produkt"
               ) : (

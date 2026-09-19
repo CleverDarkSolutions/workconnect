@@ -31,7 +31,9 @@ export function ProductTable({ products }: ProductTableProps) {
       <TableBody>
         {products.map((product) => (
           <TableRow key={product.id}>
-            <TableCell className="font-medium">{product.name}</TableCell>
+            <TableCell className="truncate font-medium" title={product.name}>
+              {product.name}
+            </TableCell>
             <TableCell className="text-xs text-muted-foreground">{product.sku}</TableCell>
             <TableCell className="text-muted-foreground">{product.category}</TableCell>
             <TableCell className="font-medium">

@@ -75,11 +75,18 @@ describe("pricingSchema", () => {
     })
   })
 
-  it("stores typed amounts rounded to two decimals", () => {
-    expect(pricingSchema.parse({ ...validValues, priceNet: "10.005", priceGross: "12,3" })).toMatchObject({
-      priceNet: 10.01,
-      priceGross: 12.3,
+  it("accepts comma decimals and rejects more than two decimal places", () => {
+    expect(pricingSchema.parse({ ...validValues, priceGross: "12,3" }).priceGross).toBe(12.3)
+    expect(issuesOf(pricingSchema.safeParse({ ...validValues, priceNet: "10.005" }))).toEqual({
+      priceNet: "Podaj poprawną kwotę, np. 199.99",
     })
+  })
+
+  it("rejects amounts above the supported maximum", () => {
+    expect(issuesOf(pricingSchema.safeParse({ ...validValues, priceNet: "1000000000" }))).toEqual({
+      priceNet: "Kwota jest zbyt duża",
+    })
+    expect(pricingSchema.safeParse({ ...validValues, priceNet: "999999999.99" }).success).toBe(true)
   })
 
   it("reports empty and malformed amounts on the right field", () => {
@@ -112,6 +119,17 @@ describe("availabilitySchema", () => {
     expect(
       availabilitySchema.safeParse({ ...validValues, isLimited: true, stockQuantity: "0" }).success
     ).toBe(true)
+  })
+
+  it("rejects quantities above the supported maximum", () => {
+    expect(
+      issuesOf(availabilitySchema.safeParse({ ...validValues, maxCartQuantity: "1000000000" }))
+    ).toEqual({ maxCartQuantity: "Wartość jest zbyt duża" })
+    expect(
+      issuesOf(
+        availabilitySchema.safeParse({ ...validValues, isLimited: true, stockQuantity: "1000000000" })
+      )
+    ).toEqual({ stockQuantity: "Wartość jest zbyt duża" })
   })
 
   it("rejects a minimum cart quantity above the maximum, on both fields", () => {

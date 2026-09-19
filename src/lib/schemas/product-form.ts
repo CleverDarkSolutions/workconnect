@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import { parseAmount, roundMoney } from "@/lib/price"
+import { parseAmount } from "@/lib/price"
 import {
   CATEGORIES,
   CURRENCIES,
@@ -56,6 +56,10 @@ export const productFormDefaultValues: ProductFormValues = {
   maxCartQuantity: "10",
 }
 
+/** Upper bounds keep every stored number inside exact double precision. */
+export const MAX_AMOUNT = 999_999_999.99
+export const MAX_QUANTITY = 999_999_999
+
 const INTEGER_PATTERN = /^\d+$/
 
 /** `<Select>` value that must be one of the predefined options ("" means nothing chosen). */
@@ -64,31 +68,42 @@ const requiredChoice = <const T extends readonly [string, ...string[]]>(
   message: string
 ) => z.string().pipe(z.enum(options, { error: message }))
 
-const amountField = (requiredMessage: string) =>
+type Parsed<T> = { value: T } | { message: string }
+
+/** Parses a typed amount ("199.99", "199,99"), or explains why it is not acceptable. */
+function parseAmountInput(input: string, requiredMessage: string): Parsed<number> {
+  if (input.trim() === "") return { message: requiredMessage }
+  const amount = parseAmount(input)
+  if (amount === null) return { message: "Podaj poprawną kwotę, np. 199.99" }
+  if (amount > MAX_AMOUNT) return { message: "Kwota jest zbyt duża" }
+  return { value: amount }
+}
+
+/** Parses a typed quantity (non-negative integer), or explains why it is not acceptable. */
+function parseQuantityInput(input: string, requiredMessage: string): Parsed<number> {
+  const trimmed = input.trim()
+  if (trimmed === "") return { message: requiredMessage }
+  if (!INTEGER_PATTERN.test(trimmed)) return { message: "Podaj nieujemną liczbę całkowitą" }
+  const quantity = Number(trimmed)
+  if (quantity > MAX_QUANTITY) return { message: "Wartość jest zbyt duża" }
+  return { value: quantity }
+}
+
+const numberField = (parse: (input: string) => Parsed<number>) =>
   z.string().transform((input, ctx) => {
-    const amount = parseAmount(input)
-    if (amount === null) {
-      ctx.addIssue({
-        code: "custom",
-        message: input.trim() ? "Podaj poprawną kwotę, np. 199.99" : requiredMessage,
-      })
+    const parsed = parse(input)
+    if ("message" in parsed) {
+      ctx.addIssue({ code: "custom", message: parsed.message })
       return z.NEVER
     }
-    return roundMoney(amount)
+    return parsed.value
   })
 
+const amountField = (requiredMessage: string) =>
+  numberField((input) => parseAmountInput(input, requiredMessage))
+
 const integerField = (requiredMessage: string) =>
-  z.string().transform((input, ctx) => {
-    const trimmed = input.trim()
-    if (!INTEGER_PATTERN.test(trimmed)) {
-      ctx.addIssue({
-        code: "custom",
-        message: trimmed ? "Podaj nieujemną liczbę całkowitą" : requiredMessage,
-      })
-      return z.NEVER
-    }
-    return Number(trimmed)
-  })
+  numberField((input) => parseQuantityInput(input, requiredMessage))
 
 // ---------------------------------------------------------------------------
 // Step 1 — Informacje podstawowe
@@ -158,14 +173,11 @@ function availabilityRules(
   values: z.output<typeof availabilityFields>,
   ctx: z.RefinementCtx
 ) {
-  if (values.isLimited && !INTEGER_PATTERN.test(values.stockQuantity.trim())) {
-    ctx.addIssue({
-      code: "custom",
-      path: ["stockQuantity"],
-      message: values.stockQuantity.trim()
-        ? "Podaj nieujemną liczbę całkowitą"
-        : "Podaj ilość na magazynie",
-    })
+  if (values.isLimited) {
+    const stock = parseQuantityInput(values.stockQuantity, "Podaj ilość na magazynie")
+    if ("message" in stock) {
+      ctx.addIssue({ code: "custom", path: ["stockQuantity"], message: stock.message })
+    }
   }
 
   if (

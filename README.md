@@ -69,8 +69,10 @@ e2e/                              # scenariusze Playwright
 
 Cały formularz to jedna instancja TanStack Form (`useAppForm`); każdy krok jest osobnym
 komponentem `withForm`, więc powrót „Wstecz" niczego nie resetuje. Numer bieżącego kroku
-jest częścią stanu formularza (`step`), dzięki czemu `form.reset()` przy zamknięciu dialogu
-cofa również do kroku 1.
+jest częścią stanu formularza (`step`), dzięki czemu jedno `form.reset()` cofa również do
+kroku 1. Reset wykonuje się przy każdym otwarciu dialogu — każda sesja zaczyna od pustego
+kroku 1 niezależnie od tego, jak zakończyła się poprzednia (X, Escape, kliknięcie tła,
+zapis), a zamykająca się animacja nie „przeskakuje" na krok 1.
 
 Walidatorem formularza jest `productFormSchema` — `z.discriminatedUnion("step", …)`
 złożony z trzech schematów krokowych (`basicInfoSchema`, `pricingSchema`,
@@ -92,9 +94,10 @@ komunikaty nigdy nie są nieaktualne.
 `brutto = netto × (1 + VAT / 100)`. Edycja netto wylicza brutto, edycja brutto wylicza
 netto, a **zmiana stawki VAT zawsze przelicza brutto na podstawie netto** (treść zadania
 zostawia wybór „brutto lub netto"; wybrałem jedną deterministyczną regułę). Każdy handler
-zapisuje dokładnie jedno pole, więc nie ma pętli aktualizacji. Zaokrąglenie do 2 miejsc
-następuje tylko przy wyliczaniu wartości pochodnej (`lib/price.ts`, pokryte testami,
-w tym przypadki typu `1.005`).
+zapisuje dokładnie jedno pole, więc nie ma pętli aktualizacji. Obliczenia idą na pełnych
+groszach (`lib/price.ts`), więc przypadki „pół grosza" (12,50 × 1,23 = 15,375 → 15,38)
+zaokrąglają się dokładnie, a nie przez ułamki binarne — pokryte testami, łącznie z
+własnością netto → brutto → netto dla każdej stawki.
 
 ### Warunkowe pole „Ilość na magazynie"
 
@@ -122,7 +125,10 @@ i pojawia się toast „Produkt został dodany" (jak na makiecie).
   użyłem „Opis" zgodnie z treścią zadania.
 - **VAT jako Select.** Makieta rysuje stawkę VAT jako zwykłe pole z wartością „23%";
   zadanie wymaga `Select`, więc jest to `Select` (23%, 8%, 5%, 0%).
-- **Liczby w inputach.** Kwoty przyjmują przecinek lub kropkę („12,50" i „12.50");
-  ilości muszą być nieujemnymi liczbami całkowitymi.
+- **Liczby w inputach.** Kwoty przyjmują przecinek lub kropkę („12,50" i „12.50") i
+  maksymalnie dwa miejsca po przecinku — zapisywane jest dokładnie to, co wpisano, bez
+  cichego zaokrąglania. Ilości muszą być nieujemnymi liczbami całkowitymi. Kwoty i ilości
+  mają górny limit (999 999 999,99 / 999 999 999), żeby każda zapisana liczba mieściła się
+  w dokładnej precyzji `number`.
 - **Mobile.** Makieta zawiera również wersję mobilną (karty zamiast tabeli, dialog na
   pełnym ekranie) — jest zaimplementowana i objęta testami e2e.

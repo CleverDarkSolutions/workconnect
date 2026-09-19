@@ -1,29 +1,35 @@
 /**
  * Net / gross / VAT arithmetic for the pricing step.
  *
- * Formula from the brief: brutto = netto × (1 + VAT / 100).
- * Money is rounded to 2 decimals only when a derived value is produced,
- * never while the user is still typing.
+ * Formula from the brief: brutto = netto × (1 + VAT / 100). All derivations
+ * run on whole cents so half-cent cases round exactly (12.50 × 1.23 = 15.375
+ * → 15.38) instead of drifting through binary fractions.
  */
 
-const AMOUNT_PATTERN = /^\d+(?:[.,]\d+)?$/
+const AMOUNT_PATTERN = /^\d+(?:[.,]\d{1,2})?$/
 
-/** Rounds half away from zero to 2 decimals without binary float artifacts (1.005 → 1.01). */
+/** Whole cents of an amount, resolving a third decimal half-up without float artifacts (1.005 → 101). */
+export function toCents(amount: number): number {
+  const [mantissa, exponent = "0"] = amount.toString().split("e")
+  return Math.round(Number(`${mantissa}e${Number(exponent) + 2}`))
+}
+
 export function roundMoney(value: number): number {
-  const [mantissa, exponent = "0"] = value.toString().split("e")
-  const cents = Math.round(Number(`${mantissa}e${Number(exponent) + 2}`))
-  return cents / 100
+  return toCents(value) / 100
 }
 
 export function grossFromNet(net: number, vatRatePercent: number): number {
-  return roundMoney(net * (1 + vatRatePercent / 100))
+  return Math.round((toCents(net) * (100 + vatRatePercent)) / 100) / 100
 }
 
 export function netFromGross(gross: number, vatRatePercent: number): number {
-  return roundMoney(gross / (1 + vatRatePercent / 100))
+  return Math.round((toCents(gross) * 100) / (100 + vatRatePercent)) / 100
 }
 
-/** Parses user input such as "12.50", "12,50" or "12"; `null` when it is not a non-negative amount. */
+/**
+ * Parses user input such as "12.50", "12,50" or "12" — at most two decimals,
+ * so what is stored is exactly what was typed. `null` when it is not such an amount.
+ */
 export function parseAmount(input: string): number | null {
   const trimmed = input.trim()
   if (!AMOUNT_PATTERN.test(trimmed)) return null

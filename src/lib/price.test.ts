@@ -8,7 +8,16 @@ import {
   netFromGross,
   parseAmount,
   roundMoney,
+  toCents,
 } from "@/lib/price"
+
+describe("toCents", () => {
+  it("converts amounts to whole cents without float artifacts", () => {
+    expect(toCents(12.35)).toBe(1235)
+    expect(toCents(1.005)).toBe(101)
+    expect(toCents(0.1 + 0.2)).toBe(30)
+  })
+})
 
 describe("roundMoney", () => {
   it("rounds to two decimals", () => {
@@ -39,8 +48,19 @@ describe("grossFromNet / netFromGross", () => {
     expect(netFromGross(9999, 23)).toBe(8129.27)
   })
 
-  it("rounds the derived amount only", () => {
+  it("rounds half-cents up exactly instead of through binary fractions", () => {
+    expect(grossFromNet(12.5, 23)).toBe(15.38)
     expect(grossFromNet(0.1 + 0.2, 23)).toBe(0.37)
+    expect(netFromGross(1.23, 23)).toBe(1)
+    expect(grossFromNet(999999999.99, 23)).toBe(1229999999.99)
+  })
+
+  it("round-trips through gross and back for every VAT rate", () => {
+    for (const vat of [0, 5, 8, 23]) {
+      for (const net of [0, 0.01, 0.99, 19.99, 123.45, 9999]) {
+        expect(netFromGross(grossFromNet(net, vat), vat)).toBe(net)
+      }
+    }
   })
 })
 
@@ -51,11 +71,12 @@ describe("parseAmount", () => {
     expect(parseAmount(" 7 ")).toBe(7)
   })
 
-  it("rejects anything that is not a non-negative amount", () => {
+  it("rejects anything that is not a non-negative amount with up to two decimals", () => {
     expect(parseAmount("")).toBeNull()
     expect(parseAmount("abc")).toBeNull()
     expect(parseAmount("-5")).toBeNull()
     expect(parseAmount("1.2.3")).toBeNull()
+    expect(parseAmount("1.005")).toBeNull()
   })
 })
 

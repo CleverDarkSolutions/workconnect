@@ -34,8 +34,10 @@
 }
 
 /*
- * Tokens sampled from the Figma file: Tailwind "neutral" greys,
- * blue-600 as the primary, green-600 / red-600 for availability badges.
+ * Tokens sampled from the Figma file: Tailwind "neutral" greys plus the
+ * exact hex values the design uses for the primary and the two badge
+ * colours (Tailwind v3 blue-600 / green-600 / red-600 — v4's oklch shades
+ * are visibly different).
  */
 :root {
   --background: oklch(0.985 0 0);
@@ -44,7 +46,7 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.546 0.245 262.881);
+  --primary: #2563eb;
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -52,11 +54,11 @@
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --success: oklch(0.627 0.194 149.214);
+  --destructive: #dc2626;
+  --success: #16a34a;
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.546 0.245 262.881);
+  --ring: #2563eb;
   --radius: 0.625rem;
 }
 

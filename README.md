@@ -4,7 +4,8 @@ Zadanie rekrutacyjne WorkConnect — trzyetapowy formularz dodawania produktu w 
 modalnym, walidowany krok po kroku, zasilający tabelę produktów z paginacją
 zsynchronizowaną z adresem URL.
 
-**Demo:** _link do wdrożenia pojawi się tutaj_
+**Demo:** https://workconnect-product-form.vercel.app
+**Repozytorium:** https://github.com/CleverDarkSolutions/workconnect
 
 ## Stack
 
@@ -37,6 +38,13 @@ npm run test:e2e   # testy Playwright (desktop + mobile); same budują i urucham
 
 Przed pierwszym `npm run test:e2e` należy pobrać przeglądarkę:
 `npx playwright install chromium`.
+
+Ten sam zestaw testów można uruchomić przeciwko wdrożonej wersji:
+
+```bash
+npx playwright test -c playwright.prod.config.ts          # domyślnie link z sekcji Demo
+E2E_BASE_URL=https://… npx playwright test -c playwright.prod.config.ts
+```
 
 ## Struktura
 

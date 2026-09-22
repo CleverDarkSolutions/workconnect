@@ -16,6 +16,27 @@ zsynchronizowaną z adresem URL.
 - [nuqs](https://nuqs.dev) — numer strony tabeli w parametrach URL
 - Vitest (logika i schematy) + Playwright (scenariusze end-to-end)
 
+### Dlaczego Next.js, skoro nie było wymagane
+
+Treść zadania mówi „Frontend (React)" i nie wskazuje frameworka. Żadna z wymaganych
+bibliotek go nie wymusza: nuqs ma adapter dla czystego Reacta
+(`nuqs/adapters/react`), a shadcn/ui potrafi zainicjować projekt na Vite — SPA na
+Vite spełniłaby wszystkie wymagania. Wybrałem Next.js, ponieważ:
+
+- to domyślna ścieżka dla tego stacku — `shadcn init` generuje projekt Next, a preset
+  Radix / Nova (ten, w którym najwyraźniej powstał design) przyszedł właśnie stamtąd,
+- jest konwencją na stanowiskach reactowych, więc nie wymaga uzasadnienia w kodzie,
+- daje bezkonfiguracyjny deploy na Vercel, o który prosi treść zadania.
+
+**Co to realnie dało:** wiersze tabeli trafiają do HTML-a, więc na mobile (rzeczywisty
+throttling) LCP jest równy FCP, ~1,5 s. SPA na Vite pokazywałaby pusty kontener aż do
+zakończenia hydracji.
+
+**Co to realnie kosztowało:** odczyt `?page` przez `useSearchParams` wyklucza trasę ze
+statycznego prerenderu, przez co początkowo wysyłany był pusty shell (LCP 3,16 s na
+mobile). Problem wyszedł w Lighthousie i jest naprawiony świadomie —
+`export const dynamic = "force-dynamic"` w `src/app/page.tsx`.
+
 ## Uruchomienie
 
 Wymagany Node.js 20+ i npm.

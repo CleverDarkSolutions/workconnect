@@ -9,9 +9,9 @@ const VAT_OPTIONS = VAT_RATES.map((value) => ({ value, label: `${value}%` }))
 const CURRENCY_OPTIONS = CURRENCIES.map((value) => ({ value, label: value }))
 
 /**
- * Step 2 — Cena. Net and gross are linked: editing one derives the other
- * from the VAT rate, and changing the VAT rate re-derives gross from net.
- * Each handler writes exactly one other field, so there is no update loop.
+ * Net and gross are linked: editing one derives the other from the VAT rate,
+ * and changing the VAT rate re-derives gross from net. Each handler writes
+ * exactly one other field, so there is no update loop.
  */
 export const PricingStep = withForm({
   ...productFormOptions,

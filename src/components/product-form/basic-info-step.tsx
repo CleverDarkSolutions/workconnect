@@ -11,7 +11,6 @@ import {
 const MANUFACTURER_OPTIONS = MANUFACTURERS.map((value) => ({ value, label: value }))
 const CATEGORY_OPTIONS = CATEGORIES.map((value) => ({ value, label: value }))
 
-/** Step 1 — Informacje podstawowe. */
 export const BasicInfoStep = withForm({
   ...productFormOptions,
   render: function BasicInfoStep({ form }) {

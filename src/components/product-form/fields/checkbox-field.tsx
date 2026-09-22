@@ -6,7 +6,6 @@ import { Field, FieldLabel } from "@/components/ui/field"
 
 type CheckboxFieldProps = {
   label: string
-  /** Called after the field value changed — used to clear the stock field when "limitowany" is unchecked. */
   onValueChange?: (checked: boolean) => void
 }
 

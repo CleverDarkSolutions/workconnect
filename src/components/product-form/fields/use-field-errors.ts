@@ -4,13 +4,12 @@ import { useFieldContext } from "@/components/product-form/form-context"
 
 /**
  * Errors of the current field, shown once the user has edited it and left it
- * — never while they are still typing. A failed "Dalej" marks every field of
- * the step as blurred (see the dialog's `onSubmitInvalid`), which is what
- * reveals errors for fields the user skipped.
+ * — never while they are still typing. A blocked "Dalej" marks the step's
+ * fields as blurred, which reveals errors for the ones they skipped.
  *
- * The form's only validator is the Zod schema, so every error is a Standard
- * Schema issue — the return type pins that down where TanStack's untyped
- * field context would otherwise widen it to `any`.
+ * The explicit return type keeps the errors typed: the schema is the form's
+ * only validator, so they are always Standard Schema issues, which the
+ * untyped field context would otherwise widen to `any`.
  */
 export function useFieldErrors(): StandardSchemaV1Issue[] {
   const field = useFieldContext()

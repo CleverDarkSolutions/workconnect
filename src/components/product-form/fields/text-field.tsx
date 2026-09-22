@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input"
 
 type TextFieldProps = Pick<ComponentProps<"input">, "placeholder" | "inputMode"> & {
   label: string
-  /** Called after the field value changed — used by the pricing step to derive the linked price. */
   onValueChange?: (value: string) => void
 }
 

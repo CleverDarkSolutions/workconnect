@@ -42,9 +42,8 @@ export function ProductFormDialog({ trigger, onSubmit }: ProductFormDialogProps)
 
   const form = useAppForm({
     ...productFormOptions,
-    // "Dalej" and "Zapisz produkt" both submit; the schema discriminated on
-    // `step` decides which fields must be valid, so an invalid step never
-    // gets past this callback.
+    // "Dalej" and "Zapisz produkt" both submit; the step-discriminated schema
+    // decides which fields must be valid, so an invalid step never gets here.
     onSubmit: ({ value, formApi }) => {
       if (value.step < LAST_STEP) {
         formApi.setFieldValue("step", nextStep(value.step))
@@ -53,8 +52,8 @@ export function ProductFormDialog({ trigger, onSubmit }: ProductFormDialogProps)
       onSubmit(productSchema.parse(value))
       setOpen(false)
     },
-    // A blocked "Dalej" reveals the errors of every field on the step, the
-    // way leaving each field would; fields are otherwise quiet while typing.
+    // Reveal the errors of every field on the step, the way leaving each of
+    // them would; fields are otherwise quiet while the user types.
     onSubmitInvalid: ({ formApi }) => {
       for (const name of Object.keys(formApi.state.fieldMeta) as FieldName[]) {
         formApi.setFieldMeta(name, (meta) => ({ ...meta, isBlurred: true }))
@@ -66,10 +65,9 @@ export function ProductFormDialog({ trigger, onSubmit }: ProductFormDialogProps)
   const isSubmitting = useStore(form.store, (state) => state.isSubmitting)
 
   function handleOpenChange(nextOpen: boolean) {
-    // Every session starts from a blank step 1, however the previous one
-    // ended (X, Escape, overlay click or a successful save). Resetting on
-    // open rather than on close keeps the closing animation from snapping to
-    // step 1 and cannot be skipped by reopening mid-animation.
+    // Every session starts from a blank step 1, however the last one ended.
+    // Resetting on open rather than on close keeps the closing dialog from
+    // visibly snapping back to step 1.
     if (nextOpen) form.reset()
     setOpen(nextOpen)
   }

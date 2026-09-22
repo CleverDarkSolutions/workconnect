@@ -17,7 +17,6 @@ type SelectFieldProps = {
   label: string
   placeholder?: string
   options: readonly SelectOption[]
-  /** Called after the field value changed — used by the pricing step to re-derive the gross price. */
   onValueChange?: (value: string) => void
 }
 

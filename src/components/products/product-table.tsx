@@ -14,7 +14,6 @@ type ProductTableProps = {
   products: readonly Product[]
 }
 
-/** Desktop layout of the catalog (the mobile layout is `ProductCardList`). */
 export function ProductTable({ products }: ProductTableProps) {
   return (
     <Table className="table-fixed">

@@ -1,5 +1,3 @@
-/** Predefined option lists backing the form selects and the multi-select chips. */
-
 export const MANUFACTURERS = [
   "Apple",
   "Samsung",

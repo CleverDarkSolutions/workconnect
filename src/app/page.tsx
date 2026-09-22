@@ -1,10 +1,9 @@
 import { ProductsPage } from "@/components/products/products-page"
 
 /**
- * Rendered per request rather than prerendered: the catalog depends on the
- * `?page` search param, and rendering it on the server puts the rows in the
- * HTML instead of leaving a blank page until hydration (Lighthouse mobile LCP
- * went from ~3.1 s to well under 1 s on the simulated slow connection).
+ * The catalog reads the `?page` search param, which opts the route out of
+ * static prerendering. Rendering it per request ships the rows in the HTML
+ * instead of a blank page that fills in on hydration.
  */
 export const dynamic = "force-dynamic"
 

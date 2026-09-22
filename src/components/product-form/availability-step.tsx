@@ -3,7 +3,6 @@
 import { withForm } from "@/components/product-form/app-form"
 import { productFormOptions } from "@/components/product-form/product-form-options"
 
-/** Step 3 — Dostępność i stany magazynowe. */
 export const AvailabilityStep = withForm({
   ...productFormOptions,
   render: function AvailabilityStep({ form }) {
